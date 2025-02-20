@@ -3,22 +3,22 @@ import { v4 as uuidv4 } from 'uuid';
 const Mutation = {
 
     // Mutation to create user
-    createUser: (parent, args, { db }, info) => {
-       const isEmailTaken = db.users.some(user => user.email === args.email);
+    createUser: (parent, {data}, { db }, info) => {
+       const isEmailTaken = db.users.some(user => user.email === data.email);
     if(isEmailTaken){
         throw new Error('Email is already taken');
     }
     const user = {
         id: uuidv4(),
-        ...args
+        ...data
     }
     db.users.push(user);
     return user;
     },
 
     // Mutation to update user
-    UpdateUser: (parent, args, {db}, info) => {
-        const { id, ...data } = args;
+    UpdateUser: (parent, {id, data}, {db}, info) => {
+        
         const userExist = db.users.find(user => user.id === id);
 
         if (!userExist) {
@@ -40,21 +40,20 @@ const Mutation = {
         });
         return {...userExist, ...data};
     },
-    
+
     // Mutation to create author
-    CreateAuthor: (parent, args, { db }, info) => {
+    CreateAuthor: (parent, {data}, { db }, info) => {
 
         const author = {
             id: uuidv4(),
-            ...args
+            ...data
         }
         db.authors.push(author);
         return author;
     },
 
     // Mutation to update author
-    updateAuthor: (parent, args, { db }, info) => {
-        const { id, ...data } = args;
+    updateAuthor: (parent, {id, data}, { db }, info) => {
         const authorExist = db.authors.find(author => author.id === id);
 
         if (!authorExist) {
@@ -72,6 +71,48 @@ const Mutation = {
         });
         return {...authorExist, ...data};
     },
+    //Mutation to create book
+    createBook: (parent, {data}, { db }, info) => {
+        
+        const book = {
+            id: uuidv4(),
+            ...data
+        }
+        db.books.push(book);
+        return book;
+    },
+    //Mutation to update book
+    updateBook: (parent, {id, data}, { db }, info) => {
+        const bookExist = db.books.find(book => book.id === id);
 
+        if (!bookExist) {
+            throw new Error('Book not found');
+        }
+
+        db.books = db.books.map(book => {
+            if(book.id === id){
+                return {
+                    ...book,
+                    ...data
+                }
+            }
+            return book;
+        });
+        return {...bookExist, ...data};
+    },
+    //Mutation to delete user
+    deleteBook: (parent, {id}, { db }, info) => {
+        const bookExixt = db.books.find(book => book.id === id)
+        if(!bookExixt){
+            throw new Error('Book not found');
+        }
+        db.books = db.books.reduce((acc, book) => {
+            if(book.id !== id){
+                acc.push(book);
+            }
+            return acc
+        }, [])
+        return bookExixt;
+    },
 }
 export default Mutation;
