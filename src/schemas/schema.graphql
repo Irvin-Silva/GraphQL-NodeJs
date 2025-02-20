@@ -16,6 +16,7 @@ type Author {
     name: String!
     country: String!
     register_by: User!
+    books: [Book!]!
     
 }
 type Book {
