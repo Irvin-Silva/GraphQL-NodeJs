@@ -22,7 +22,8 @@
     "@graphql-yoga/node": "^3.9.1",
     "graphql-tag": "^2.12.6",
     "graphql-yoga": "^5.10.9",
-    "http": "^0.0.1-security"
+    "http": "^0.0.1-security",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.26.4",

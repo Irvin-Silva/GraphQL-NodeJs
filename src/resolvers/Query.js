@@ -1,4 +1,6 @@
 const Query = {
+
+
     hello: (parent, args, ctx, info) => {
         const { name } = args;
 
@@ -26,7 +28,8 @@ const Query = {
         //return author by id provided in the argument 
         return db.authors.filter(author => author.id === id);
     },
-    
+
+    // Query to get all books or by id
     book: (parent, { id }, { db }, info) => {
         // if id is not provided, return all books
         if (!id) {
