@@ -9,34 +9,46 @@ const Query = {
     quantity: () => 100,
 
     // Query to get all users or by id
-    user: (parent, { id }, ctx, info) => {
-        const { db } = ctx;
-
+    user: (parent, { id }, { prisma }, info) => {
         if (!id) {
-            return db.users;
+            return prisma.users.findMany();
         }
-
-        return db.users.filter(user => user.id === id);
+    
+        return prisma.users.findUnique({
+            where: {
+                id,
+            }
+        });
+    
     },
+    
 
     // Query to get all authors or by id
-    author: (parent, { id }, { db }, info) => {
-        // if id is not provided, return all authors
+    author: (parent, { id }, { prisma }, info) => {
+        // If id is not provided, return all authors.
         if (!id) {
-            return db.authors;
+            return prisma.authors.findMany()
         }
-        //return author by id provided in the argument 
-        return db.authors.filter(author => author.id === id);
+        // Return author by id provided in the argument.
+        return prisma.authors.findUnique({
+            where: {
+                id,
+            }
+        });
     },
 
     // Query to get all books or by id
-    book: (parent, { id }, { db }, info) => {
+    book: (parent, { id }, { prisma }, info) => {
         // if id is not provided, return all books
         if (!id) {
-            return db.books;
+            return prisma.books.findMany();
         }
         //return book by id provided in the argument 
-        return db.books.filter(book => book.id === id);
+        return prisma.books.findUnique({
+            where: {
+                id,
+            }
+        });
     }
     
 };

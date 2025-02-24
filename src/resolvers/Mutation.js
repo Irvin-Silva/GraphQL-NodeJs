@@ -1,118 +1,164 @@
 import { v4 as uuidv4 } from 'uuid';
+import { generateToken, hashPassword, validatePassword} from '../utils';
+import { Token } from 'graphql';
+
 
 const Mutation = {
 
     // Mutation to create user
-    createUser: (parent, {data}, { db }, info) => {
-       const isEmailTaken = db.users.some(user => user.email === data.email);
-    if(isEmailTaken){
-        throw new Error('Email is already taken');
-    }
-    const user = {
-        id: uuidv4(),
-        ...data
-    }
-    db.users.push(user);
-    return user;
+    signUp: async (parent, {data}, { prisma }, info) => {
+
+       const password = await hashPassword(data.password);
+
+       const user = await prisma.users.create({ 
+              data: {
+                ...data,
+                password
+              },
+       })
+       return{
+
+        user,
+        token: generateToken(user.id)
+
+
+       } 
+        
+    },
+
+    login: async (parent, {data}, { prisma }, info) => {
+
+        const user = await prisma.users.findUnique({
+            where: {
+                email: data.email
+            }
+        });
+        const isValid = await validatePassword(data.password, user.password);
+        
+        if(!isValid){
+            throw new Error('Invalid password');
+        }
+        return {
+            user,
+            token: generateToken(user.id)
+        }
     },
 
     // Mutation to update user
-    UpdateUser: (parent, {id, data}, {db}, info) => {
-        
-        const userExist = db.users.find(user => user.id === id);
-
-        if (!userExist) {
-            throw new Error('User not found');
-        }
-        const isEmailTaken = db.users.some(user => user.email === data.email);
-        if(isEmailTaken){
-            throw new Error('Email is already taken');
-        }
-
-        db.users = db.users.map(user => {
-            if(user.id === id){
-                return {
-                    ...user,
-                    ...data
-                }
-            }
-            return user;
+    UpdateUser: (parent, {id, data}, {prisma}, info) => {
+        return prisma.users.update({
+            where: {
+                id
+            },
+            data
         });
-        return {...userExist, ...data};
+        
     },
+
 
     // Mutation to create author
-    CreateAuthor: (parent, {data}, { db }, info) => {
+    CreateAuthor: async (parent, {data}, { prisma }, info) => {
+        const {register_by, ...rest} = data;
 
-        const author = {
-            id: uuidv4(),
-            ...data
-        }
-        db.authors.push(author);
-        return author;
+        const newAuthor = await prisma.authors.create({
+            data: {
+                ...rest,
+                users: {
+                    connect: {
+                        id: Number(register_by)
+                    }
+                }
+            }
+        });
+        return newAuthor;
     },
+
+
+
 
     // Mutation to update author
-    updateAuthor: (parent, {id, data}, { db }, info) => {
-        const authorExist = db.authors.find(author => author.id === id);
+    updateAuthor: async(parent, {id, data}, { prisma }, info) => {
+        const {register_by, ...rest} = data;
 
-        if (!authorExist) {
-            throw new Error('Author not found');
-        }
-
-        db.authors = db.authors.map(author => {
-            if(author.id === id){
-                return {
-                    ...author,
-                    ...data
+        if (register_by) {
+            rest.users = {
+                connect: {
+                    id: Number(register_by)
                 }
             }
-            return author;
+        }
+        const authorUpdated = await prisma.authors.update({
+            where: {
+                id: Number(id)
+            },
+            data:{
+                ...rest,
+            }
         });
-        return {...authorExist, ...data};
+        return authorUpdated;
     },
+
+
+
     //Mutation to create book
-    createBook: (parent, {data}, { db }, info) => {
-        
-        const book = {
-            id: uuidv4(),
-            ...data
-        }
-        db.books.push(book);
-        return book;
-    },
-    //Mutation to update book
-    updateBook: (parent, {id, data}, { db }, info) => {
-        const bookExist = db.books.find(book => book.id === id);
-
-        if (!bookExist) {
-            throw new Error('Book not found');
-        }
-
-        db.books = db.books.map(book => {
-            if(book.id === id){
-                return {
-                    ...book,
-                    ...data
+    createBook: async (parent, {data}, { prisma }, info) => {
+       const{writted_by, register_by, ...rest} = data;
+        const newBook = await prisma.books.create({
+            data: {
+                ...rest,
+                authors: {
+                    connect: {
+                        id: Number(writted_by)
+                    }
+                },
+                users: {
+                    connect: {
+                        id: Number(register_by)
+                    }
                 }
             }
-            return book;
         });
-        return {...bookExist, ...data};
+        return newBook;
     },
-    //Mutation to delete user
-    deleteBook: (parent, {id}, { db }, info) => {
-        const bookExixt = db.books.find(book => book.id === id)
-        if(!bookExixt){
-            throw new Error('Book not found');
-        }
-        db.books = db.books.reduce((acc, book) => {
-            if(book.id !== id){
-                acc.push(book);
+
+
+    //Mutation to update book
+    updateBook: async (parent, {id, data}, { prisma }, info) => {
+        const {writted_by, register_by , ...rest} = data;
+        if(writted_by){
+            rest.authors = {
+                connect: {
+                    id: Number(writted_by)
+                }
             }
-            return acc
-        }, [])
-        return bookExixt;
+        }
+        if(register_by){
+            rest.users = {
+                connect: {
+                    id: Number(register_by)
+                }
+            }
+        }
+        const bookUpdated = await prisma.books.update({
+            where: {
+                id: Number(id)
+            },
+            data: {
+                ...rest
+            }
+        });
+        return bookUpdated;
+    },
+
+    //Mutation to delete user
+    deleteBook: async(parent, {id}, { prisma }, info) => {
+        
+        const bookDeleted = await prisma.books.delete({
+            where: {
+                id: Number(id)
+            }
+        });
+        return bookDeleted;
     },
 }
 export default Mutation;

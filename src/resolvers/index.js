@@ -2,11 +2,16 @@ import Query from './Query';
 import Author from './Author';
 import Book from './Book';
 import Mutation from './Mutation';
+
+
 const resolvers = {
     Query,
     Author,
     Book,
-    Mutation
+    Mutation,
+    
 };
+
+
 
 export default resolvers;

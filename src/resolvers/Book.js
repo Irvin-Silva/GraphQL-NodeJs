@@ -1,10 +1,21 @@
 const Book = {
-    register_by: (parent, args, { db }, info) => {
-        return db.users.find(user => user.id === parent.register_by);
+    register_by: (parent, args, { prisma }, info) => {
+        return prisma.books.findUnique({
+            where: {
+                id: parent.id
+            }
+        }).users()
+
+
     },
-    writted_by: (parent, args, { db }, info) => {
-        return db.authors.find(author => author.id === parent.writted_by);
-    }
+    writted_by: (parent, args, { prisma }, info) => {
+        return prisma.books.findUnique({
+            where: {
+                id: parent.id
+            }
+        }).authors()
+    },
+    
 };
 
 export default Book;
