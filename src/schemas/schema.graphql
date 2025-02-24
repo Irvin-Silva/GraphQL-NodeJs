@@ -59,7 +59,7 @@ type AuthPayload {
 }
 
 input updateUserInput {
-    name: String, lastname: String, email: String 
+    name: String, lastname: String, email: String, password: String
 }
 
 input createAuthorInput {

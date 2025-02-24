@@ -34,7 +34,7 @@ const Mutation = {
             }
         });
         const isValid = await validatePassword(data.password, user.password);
-        
+
         if(!isValid){
             throw new Error('Invalid password');
         }
@@ -45,10 +45,14 @@ const Mutation = {
     },
 
     // Mutation to update user
-    UpdateUser: (parent, {id, data}, {prisma}, info) => {
+    UpdateUser: async (parent, {id, data}, {prisma}, info) => {
+        const {password} = data
+        if(password){
+            data.password = await hashPassword(data.password)
+        }
         return prisma.users.update({
             where: {
-                id
+                id: Number(id)
             },
             data
         });
