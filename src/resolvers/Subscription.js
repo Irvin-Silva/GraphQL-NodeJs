@@ -1,6 +1,10 @@
+import { getUserId } from "../utils";
+
 const Subscription = {
+    
     count: {
-        subscribe(parent, args, { pubsub }, info) {
+        subscribe(parent, args, {request, pubsub }, info) {
+            const userId = getUserId(request);
             console.log(pubsub.asyncIterator); // Verifica si el método está disponible
             let count = 0;
             setInterval(() => {

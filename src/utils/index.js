@@ -20,3 +20,20 @@ export const validatePassword = async (requestPassword, password) => {
 export const generateToken = (userId) => {
     return jwt.sign({ userId }, SECRET, { expiresIn: '2d' });
 };
+
+export const getUserId = (request) => {
+    
+    const header = request.headers.get('authorization');
+    
+    if (!header) {
+        throw new Error('Authentication required');
+    }
+
+    const token = header.replace('Bearer ', '');
+    try {
+        const decoded = jwt.verify(token, SECRET);
+        return decoded.userId;
+    } catch (e) {
+        throw new Error('Invalid token');
+    }
+};

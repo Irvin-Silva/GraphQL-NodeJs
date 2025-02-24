@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { generateToken, hashPassword, validatePassword} from '../utils';
+import { generateToken, hashPassword, validatePassword, getUserId} from '../utils';
 import { Token } from 'graphql';
 
 
@@ -45,7 +45,8 @@ const Mutation = {
     },
 
     // Mutation to update user
-    UpdateUser: async (parent, {id, data}, {prisma}, info) => {
+    UpdateUser: async (parent, {id, data}, {request, prisma}, info) => {
+        const userId = getUserId(request);
         const {password} = data
         if(password){
             data.password = await hashPassword(data.password)
@@ -61,9 +62,9 @@ const Mutation = {
 
 
     // Mutation to create author
-    CreateAuthor: async (parent, {data}, { prisma }, info) => {
+    CreateAuthor: async (parent, {data}, {request, prisma }, info) => {
         const {register_by, ...rest} = data;
-
+        const userId = getUserId(request);
         const newAuthor = await prisma.authors.create({
             data: {
                 ...rest,
@@ -81,7 +82,8 @@ const Mutation = {
 
 
     // Mutation to update author
-    updateAuthor: async(parent, {id, data}, { prisma }, info) => {
+    updateAuthor: async(parent, {id, data}, {request, prisma }, info) => {
+        const userId = getUserId(request);
         const {register_by, ...rest} = data;
 
         if (register_by) {
@@ -105,7 +107,8 @@ const Mutation = {
 
 
     //Mutation to create book
-    createBook: async (parent, {data}, { prisma }, info) => {
+    createBook: async (parent, {data}, {request, prisma }, info) => {
+    const userId = getUserId(request);
        const{writted_by, register_by, ...rest} = data;
         const newBook = await prisma.books.create({
             data: {
@@ -127,7 +130,8 @@ const Mutation = {
 
 
     //Mutation to update book
-    updateBook: async (parent, {id, data}, { prisma }, info) => {
+    updateBook: async (parent, {id, data}, { request, prisma }, info) => {
+        const userId = getUserId(request);
         const {writted_by, register_by , ...rest} = data;
         if(writted_by){
             rest.authors = {
@@ -155,8 +159,8 @@ const Mutation = {
     },
 
     //Mutation to delete user
-    deleteBook: async(parent, {id}, { prisma }, info) => {
-        
+    deleteBook: async(parent, {id}, { request, prisma }, info) => {
+        const userId = getUserId(request);
         const bookDeleted = await prisma.books.delete({
             where: {
                 id: Number(id)

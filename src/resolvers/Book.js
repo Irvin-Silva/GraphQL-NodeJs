@@ -1,5 +1,11 @@
+import { getUserId } from "../utils";
+
 const Book = {
-    register_by: (parent, args, { prisma }, info) => {
+
+    
+    register_by: (parent, args, { request, prisma }, info) => {
+
+        const userId = getUserId(request);
         return prisma.books.findUnique({
             where: {
                 id: parent.id
@@ -8,7 +14,8 @@ const Book = {
 
 
     },
-    writted_by: (parent, args, { prisma }, info) => {
+    writted_by: (parent, args, { request, prisma }, info) => {
+        const userId = getUserId(request);
         return prisma.books.findUnique({
             where: {
                 id: parent.id
