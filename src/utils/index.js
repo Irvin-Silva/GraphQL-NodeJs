@@ -23,6 +23,7 @@ export const generateToken = (userId) => {
 
 export const getUserId = (request) => {
     
+    // Get the Authorization
     const header = request.headers.get('authorization');
     
     if (!header) {
